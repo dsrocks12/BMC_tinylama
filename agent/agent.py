@@ -318,7 +318,7 @@ def extract_params_heuristic(user_input, api, allowed_names=None):
             rf"(?:\badd\s+)?{re.escape(pname)}\s+(?:to|as|is|=|:)\s*['\"]?([^'\",\n;]+?)['\"]?(?:\s*$|[\s,;])",
             rf"\b{re.escape(pname)}\s*=\s*['\"]?([^'\",\n;]+?)['\"]?(?:\s*$|[\s,;])",
             rf"\bwith\s+{re.escape(pname)}\s+['\"]?([^'\",\n;]+?)['\"]?(?:\s*$|[\s,;])",
-            rf"\b{re.escape(pname)}\s+['\"]?([A-Za-z0-9_*?.-]+)['\"]?(?:\s*$|[\s,;])",
+            rf"\b{re.escape(pname)}\s+['\"]?([A-Za-z0-9_*?.:-]+)['\"]?(?:\s*$|[\s,;])",
         ]
         for pat in patterns:
             m = re.search(pat, user_input, re.IGNORECASE)
@@ -509,7 +509,7 @@ def _is_plausible_param_value(param_def, value, source_text=None):
     if source_text and low in source_text.lower():
         return True
     # Wildcard / identifier-shaped filters (registry name/description patterns)
-    if re.fullmatch(r"[\w*?.,-]+", sval) and low not in ("add", "get", "list", "want"):
+    if re.fullmatch(r"[\w*?.,:-]+", sval) and low not in ("add", "get", "list", "want"):
         return True
     return False
 
@@ -916,13 +916,13 @@ def chat():
         # ─────────────────────────────────────────────────
         if state == "PHASE2_OPTIONAL":
             api = api_map[current_api]
-            last_param_source = user_input
             low_opt = user_input.lower().strip()
             if low_opt in ("skip", "no", "none", "nah", "n", "no thanks"):
                 _strip_optional_params(api, raw_params)
                 transition_to_phase3()
                 continue
 
+            last_param_source = user_input
             opt_only = _optional_param_names(api)
             extracted = phase2_extract_params(
                 user_input,
